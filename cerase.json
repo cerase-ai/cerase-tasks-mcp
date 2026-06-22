@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "namespace": "studio.guidance",
+  "name": "cerase-tasks",
+  "type": "connector",
+  "display_name": "Cerase Tasks",
+  "description": "Create and update projects and tasks on the board.",
+  "license": "MIT",
+  "install": {
+    "image": "ghcr.io/cerase-ai/cerase-tasks-mcp:latest"
+  },
+  "auth": {
+    "kind": "none",
+    "credential_scope": "tenant"
+  }
+}
