@@ -24,6 +24,7 @@ Env vars:
 from __future__ import annotations
 
 import os
+import re
 from typing import Any
 
 import httpx
@@ -102,10 +103,29 @@ def _set_status(agent_id: str, task_id: str, status: str) -> dict[str, Any]:
     )
 
 
+# Project ids are UUIDs (control-plane HasUuidV7). The list endpoint scopes
+# ONLY by `project_id` — a project NAME sent under that key matches nothing
+# and the caller gets a success-shaped empty board.
+_UUID_RE = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+    r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
+
+
 def _list_tasks(agent_id: str, project: str | None = None) -> dict[str, Any]:
     _require_agent(agent_id)
     params: dict[str, Any] = {"agent_id": agent_id}
     if project:
+        if not _UUID_RE.match(project):
+            # Fail loud: the board API has no name-scoped list (names are
+            # resolve-or-create on WRITE only), so a name here can never
+            # return the caller's project — refuse instead of replying [].
+            raise ValueError(
+                f"`project` must be a project id (UUID), got {project!r} — "
+                "the board's list endpoint scopes by id only. Pass the `id` "
+                "returned by create_project, or omit `project` to list all "
+                "open tasks."
+            )
         params["project_id"] = project
     return _get("/api/internal/task-board/tasks", params)
 
@@ -142,7 +162,9 @@ def set_status(agent_id: str, task_id: str, status: str) -> dict[str, Any]:
 def list_tasks(agent_id: str, project: str | None = None) -> dict[str, Any]:
     """List your open tasks (compact: id, title, status, phase). Call on
     demand to re-orient when resuming work — do NOT re-read the whole
-    conversation. `agent_id` is gateway-bound; `project` scopes the list.
+    conversation. `agent_id` is gateway-bound. `project` scopes the list
+    and must be a project id (UUID, from create_project) — NOT a name;
+    omit it to list every open task.
     """
     return _list_tasks(agent_id, project)
 

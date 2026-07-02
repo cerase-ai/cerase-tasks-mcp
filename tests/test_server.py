@@ -111,7 +111,7 @@ def test_list_tasks_is_compact_get_with_agent_query():
     assert "description" not in out["tasks"][0]
 
 
-def test_list_tasks_passes_project_filter():
+def test_list_tasks_passes_project_id_filter():
     seen = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -119,8 +119,25 @@ def test_list_tasks_passes_project_filter():
         return httpx.Response(200, json={"tasks": []})
 
     _mock(handler)
-    server._list_tasks(agent_id="a1", project="p9")
-    assert "project_id=p9" in seen["url"]
+    pid = "01890a5d-ac96-774b-bcce-b302099a8057"
+    server._list_tasks(agent_id="a1", project=pid)
+    assert f"project_id={pid}" in seen["url"]
+
+
+def test_list_tasks_rejects_a_project_name_fail_loud():
+    # listOpen scopes ONLY by `project_id` (a UUID) — sending a NAME under
+    # that key silently matches nothing and the agent gets a success-shaped
+    # empty board. A name must be refused loudly, and no request issued.
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(str(request.url))
+        return httpx.Response(200, json={"tasks": []})
+
+    _mock(handler)
+    with pytest.raises(ValueError, match="project id"):
+        server._list_tasks(agent_id="a1", project="Q3 Report")
+    assert calls == []
 
 
 @pytest.mark.parametrize("fn,kwargs", [
