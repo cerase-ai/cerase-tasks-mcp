@@ -2,7 +2,7 @@
 #
 # A thin first-party proxy to the control-plane PROJ-2 internal
 # endpoints (no work of its own). Exposes 4 tools: create_task,
-# set_status, list_tasks, create_project. FastMCP stdio bridged by
+# set_status, list_tasks, create_project. MCPServer stdio bridged by
 # mcp-proxy — same shape as the other cerase-* MCP images.
 FROM python:3.13.9-slim@sha256:326df678c20c78d465db501563f3492d17c42a4afe33a1f2bf5406a1d56b0e86
 
