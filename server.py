@@ -32,9 +32,9 @@ import os
 from typing import Any
 
 import httpx
-from mcp.server.mcpserver import MCPServer
+from mcp.server.fastmcp import FastMCP
 
-mcp = MCPServer("cerase-tasks")
+mcp = FastMCP("cerase-tasks")
 
 # Test seam: when set to an httpx transport (e.g. MockTransport) the
 # client routes through it instead of the network. Production leaves it

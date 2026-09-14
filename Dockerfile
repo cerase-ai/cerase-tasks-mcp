@@ -2,11 +2,17 @@
 #
 # A thin first-party proxy to the control-plane PROJ-2 internal
 # endpoints (no work of its own). Exposes 4 tools: create_task,
-# set_status, list_tasks, create_project. MCPServer stdio bridged by
+# set_status, list_tasks, create_project. FastMCP stdio bridged by
 # mcp-proxy — same shape as the other cerase-* MCP images.
-FROM python:3.13.9-slim@sha256:326df678c20c78d465db501563f3492d17c42a4afe33a1f2bf5406a1d56b0e86
+FROM python:3.13.9-slim@sha256:326df678c20c78d465db501563f3492d17c42a4afe33a1f2bf5406a1d56b0e86 AS runtime
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# The digest-pinned base lags Debian's security feed, so this stage applies the
+# published security upgrades before installing anything. The publish job's
+# blocking image scan holds the image to that, and it can only do so because its
+# scan build rebuilds the stage named `runtime` without the layer cache: a cached
+# apt layer keeps the packages of whichever day it was first built.
+RUN apt-get update && apt-get -y upgrade \
+    && apt-get install -y --no-install-recommends \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
