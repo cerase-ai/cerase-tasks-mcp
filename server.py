@@ -180,97 +180,65 @@ def _project_folder(agent_id: str, project: str) -> dict[str, Any]:
 @mcp.tool()
 def create_task(agent_id: str, title: str, project: str | None = None,
                 phase: str | None = None, description: str | None = None) -> dict[str, Any]:
-    """Record a user-recognisable unit of work on your board (e.g. answer
-    a mail, summarise a PDF) — not micro-steps. Lands in "General" unless
-    `project` is given: pass the project NAME (e.g. "Q3 Report") and it is
-    created if it doesn't exist yet — no need to create_project first or
-    pass an id. `agent_id` is gateway-bound.
+    """Record a user-recognisable unit of work on your board (e.g. answer a mail, summarise a PDF) — not micro-steps. Lands in "General" unless `project` is given: pass the project NAME (e.g. "Q3 Report") and it is created if it doesn't exist yet — no need to create_project first or pass an id. `agent_id` is gateway-bound.
 
-    Keep `title` to the short name a person would use in a sentence, and put
-    everything else in `description`: what was asked, which file or mail it
-    concerns, what "done" means here. The person reading the board a month
-    later sees the title first and opens the description to remember what the
-    work actually was — a title carrying both reads as neither.
+    Keep `title` to the short name a person would use in a sentence, and put everything else in `description`: what was asked, which file or mail it concerns, what "done" means here. The person reading the board a month later sees the title first and opens the description to remember what the work actually was — a title carrying both reads as neither.
     """
     return _create_task(agent_id, title, project, phase, description)
 
 
 @mcp.tool()
 def set_status(agent_id: str, task_id: str, status: str) -> dict[str, Any]:
-    """Move a task along backlog/todo/doing/review/done. Set `doing` when
-    you start and `done` when finished — the board records elapsed time.
-    `agent_id` is gateway-bound.
+    """Move a task along backlog/todo/doing/review/done. Set `doing` when you start and `done` when finished — the board records elapsed time. `agent_id` is gateway-bound.
     """
     return _set_status(agent_id, task_id, status)
 
 
 @mcp.tool()
 def list_tasks(agent_id: str, project: str | None = None) -> dict[str, Any]:
-    """List your open tasks (compact: id, title, status, phase, project).
-    Call on demand to re-orient when resuming work — do NOT re-read the
-    whole conversation. `agent_id` is gateway-bound. `project` scopes the
-    list and takes the project NAME or its id; omit it to list every open
-    task.
+    """List your open tasks (compact: id, title, status, phase, project). Call on demand to re-orient when resuming work — do NOT re-read the whole conversation. `agent_id` is gateway-bound. `project` scopes the list and takes the project NAME or its id; omit it to list every open task.
     """
     return _list_tasks(agent_id, project)
 
 
 @mcp.tool()
 def create_project(agent_id: str, name: str) -> dict[str, Any]:
-    """Create a project to group related tasks for a substantial,
-    multi-task piece of work; small one-offs can stay in "General". A name
-    you already have comes back as that project instead of a second one —
-    case and surrounding spaces do not make a new project.
-    `agent_id` is gateway-bound.
+    """Create a project to group related tasks for a substantial, multi-task piece of work; small one-offs can stay in "General". A name you already have comes back as that project instead of a second one — case and surrounding spaces do not make a new project. `agent_id` is gateway-bound.
     """
     return _create_project(agent_id, name)
 
 
 @mcp.tool()
 def list_projects(agent_id: str) -> dict[str, Any]:
-    """List your projects with how many tasks each holds (open and total)
-    and its workspace folder when it has one. Use it to see what you are
-    carrying before opening yet another project. `agent_id` is
-    gateway-bound.
+    """List your projects with how many tasks each holds (open and total) and its workspace folder when it has one. Use it to see what you are carrying before opening yet another project. `agent_id` is gateway-bound.
     """
     return _list_projects(agent_id)
 
 
 @mcp.tool()
 def rename_project(agent_id: str, project: str, name: str) -> dict[str, Any]:
-    """Rename one of your projects — pass its current NAME or id. Refused
-    when the new name is already another project's: merge those two
-    instead. "General" keeps its name. `agent_id` is gateway-bound.
+    """Rename one of your projects — pass its current NAME or id. Refused when the new name is already another project's: merge those two instead. "General" keeps its name. `agent_id` is gateway-bound.
     """
     return _rename_project(agent_id, project, name)
 
 
 @mcp.tool()
 def merge_projects(agent_id: str, source: str, into: str) -> dict[str, Any]:
-    """Move every task of `source` into `into` (each a project NAME or id)
-    and retire `source`. Its workspace folder travels with its tasks. Use
-    this when you find you opened two projects for one piece of work.
-    "General" is emptied rather than removed. `agent_id` is gateway-bound.
+    """Move every task of `source` into `into` (each a project NAME or id) and retire `source`. Its workspace folder travels with its tasks. Use this when you find you opened two projects for one piece of work. "General" is emptied rather than removed. `agent_id` is gateway-bound.
     """
     return _merge_projects(agent_id, source, into)
 
 
 @mcp.tool()
 def delete_project(agent_id: str, project: str) -> dict[str, Any]:
-    """Delete an EMPTY project — pass its NAME or id. A project that still
-    holds tasks is refused, because deleting it would take that work's
-    history with it: merge it into another project instead. "General"
-    cannot be deleted. `agent_id` is gateway-bound.
+    """Delete an EMPTY project — pass its NAME or id. A project that still holds tasks is refused, because deleting it would take that work's history with it: merge it into another project instead. "General" cannot be deleted. `agent_id` is gateway-bound.
     """
     return _delete_project(agent_id, project)
 
 
 @mcp.tool()
 def project_folder(agent_id: str, project: str) -> dict[str, Any]:
-    """Get the workspace folder for one of your projects (NAME or id),
-    creating it on first call. Put that project's files under the returned
-    path so you can find them later — most projects never need one.
-    `agent_id` is gateway-bound.
+    """Get the workspace folder for one of your projects (NAME or id), creating it on first call. Put that project's files under the returned path so you can find them later — most projects never need one. `agent_id` is gateway-bound.
     """
     return _project_folder(agent_id, project)
 
