@@ -10,7 +10,7 @@ to.
 
 | Tool | What it does | Arguments | Returns |
 |---|---|---|---|
-| `create_task` | Files a task. It lands in the project "General" unless `project` names another, and a project named that way is created if it does not exist. | `agent_id`, `title`, optional `project` (name), `phase`, `description` | `{id, title, status, project, hint}` |
+| `create_task` | Files a task. It lands in the project "General" unless `project` names another, and a project named that way is created if it does not exist. | `agent_id`, `title`, optional `project` (name), `phase`, `description`, `status` (where the card starts; `todo` when absent) | `{id, title, status, project, hint}` |
 | `set_status` | Moves a task to `backlog`, `todo`, `doing`, `review` or `done`; the board records the elapsed time. | `agent_id`, `task_id`, `status` | `{id, status, started_at, completed_at, hint}` |
 | `list_tasks` | Lists the open tasks: id, title, status, phase, project. | `agent_id`, optional `project` (name or id) | `{tasks}` |
 | `create_project` | Creates a project. A name that already exists, ignoring case and surrounding spaces, returns that project. | `agent_id`, `name` | `{id, name, created}` |

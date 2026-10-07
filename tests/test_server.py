@@ -109,6 +109,35 @@ def test_create_task_tool_passes_the_description_through():
     assert seen["body"]["description"] == "why this task exists"
 
 
+def test_create_task_files_the_card_in_the_status_it_is_given():
+    # On 6 October an assistant asked three times for a card in `doing` and got
+    # it in `todo` with a hint to call set_status, which it followed only
+    # sometimes: the tool had no `status`, and the argument was dropped before
+    # it reached the endpoint, which has taken one since the board existed.
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(201, json={"id": "t6", "status": "doing"})
+
+    _mock(handler)
+    out = server.create_task(agent_id="a1", title="Preventivo Magis", status="doing")
+    assert seen["body"]["status"] == "doing"
+    assert out["status"] == "doing"
+
+
+def test_create_task_leaves_the_status_to_the_board_when_none_is_given():
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(201, json={"id": "t7", "status": "todo"})
+
+    _mock(handler)
+    server.create_task(agent_id="a1", title="x")
+    assert "status" not in seen["body"]
+
+
 def test_set_status_posts_to_status_endpoint():
     seen = {}
 

@@ -94,9 +94,15 @@ def _delete(path: str, params: dict[str, Any]) -> dict[str, Any]:
 # ── core logic (importable, no decorator) ────────────────────────────
 
 def _create_task(agent_id: str, title: str, project: str | None = None,
-                 phase: str | None = None, description: str | None = None) -> dict[str, Any]:
+                 phase: str | None = None, description: str | None = None,
+                 status: str | None = None) -> dict[str, Any]:
     _require_agent(agent_id)
     payload: dict[str, Any] = {"agent_id": agent_id, "title": title}
+    if status:
+        # The endpoint has taken a status since the board existed and the tool
+        # never offered one, so a card asked for in `doing` landed in `todo`
+        # and waited for a second call the assistant made only sometimes.
+        payload["status"] = status
     if project:
         # `project` is a NAME (resolve-or-created server-side),
         # not a UUID — no id to capture from create_project and thread.
@@ -179,12 +185,15 @@ def _project_folder(agent_id: str, project: str) -> dict[str, Any]:
 
 @mcp.tool()
 def create_task(agent_id: str, title: str, project: str | None = None,
-                phase: str | None = None, description: str | None = None) -> dict[str, Any]:
+                phase: str | None = None, description: str | None = None,
+                status: str | None = None) -> dict[str, Any]:
     """Record a user-recognisable unit of work on your board (e.g. answer a mail, summarise a PDF) — not micro-steps. Lands in "General" unless `project` is given: pass the project NAME (e.g. "Q3 Report") and it is created if it doesn't exist yet — no need to create_project first or pass an id. `agent_id` is gateway-bound.
 
     Keep `title` to the short name a person would use in a sentence, and put everything else in `description`: what was asked, which file or mail it concerns, what "done" means here. The person reading the board a month later sees the title first and opens the description to remember what the work actually was — a title carrying both reads as neither.
+
+    `status` is where the card starts, one of backlog/todo/doing/review/done: pass `doing` for work you start now, so no second call is needed. Without it the card starts in `todo`.
     """
-    return _create_task(agent_id, title, project, phase, description)
+    return _create_task(agent_id, title, project, phase, description, status)
 
 
 @mcp.tool()
