@@ -18,6 +18,7 @@ to.
 | `rename_project` | Renames a project. Refused when the new name belongs to another project; "General" keeps its name. | `agent_id`, `project` (name or id), `name` | `{id, name}` |
 | `merge_projects` | Moves every task of `source`, and its workspace folder, into `into`, then retires `source`. "General" is emptied, not removed. | `agent_id`, `source`, `into` (names or ids) | `{id, name, tasks_moved, source_kept, folder}` |
 | `delete_project` | Deletes a project that holds no tasks. "General" cannot be deleted. | `agent_id`, `project` (name or id) | `{deleted}` |
+| `delete_task` | Deletes one task. A deleted task cannot be brought back; inside Cerase the person approves the call first. | `agent_id`, `task_id` | `{deleted, title, project}` |
 | `project_folder` | Returns the project's folder in the assistant's workspace, creating it on the first call. | `agent_id`, `project` (name or id) | `{id, name, folder, created}` |
 
 `agent_id` must not be empty, and every request carries it, so the

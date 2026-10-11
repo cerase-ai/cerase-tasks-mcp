@@ -284,6 +284,29 @@ def test_delete_project_surfaces_the_refusal_when_it_still_holds_tasks():
         server._delete_project(agent_id="a1", project="Pieno")
 
 
+def test_delete_task_issues_a_delete_for_that_task_carrying_the_agent():
+    # One task of the assistant's own: the board scopes it by the agent, and the
+    # gateway holds the call for approval before it gets here.
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["method"] = request.method
+        seen["url"] = str(request.url)
+        return httpx.Response(200, json={"deleted": True, "title": "Copia", "project": "Rinnovi"})
+
+    _mock(handler)
+    out = server._delete_task(agent_id="a1", task_id="t9")
+    assert seen["method"] == "DELETE"
+    assert "/api/internal/task-board/tasks/t9" in seen["url"]
+    assert "agent_id=a1" in seen["url"]
+    assert out == {"deleted": True, "title": "Copia", "project": "Rinnovi"}
+
+
+def test_delete_task_tool_passes_through():
+    _mock(lambda request: httpx.Response(200, json={"deleted": True, "title": "x", "project": None}))
+    assert server.delete_task(agent_id="a1", task_id="t9")["deleted"] is True
+
+
 def test_project_folder_posts_to_the_folder_route():
     seen = {}
 
@@ -309,6 +332,7 @@ def test_project_folder_posts_to_the_folder_route():
     (lambda: server._merge_projects(agent_id="", source="a", into="b"), None),
     (lambda: server._delete_project(agent_id="", project="p"), None),
     (lambda: server._project_folder(agent_id="", project="p"), None),
+    (lambda: server._delete_task(agent_id="", task_id="t"), None),
 ])
 def test_empty_agent_id_raises(fn, kwargs):
     with pytest.raises(ValueError, match="agent_id"):

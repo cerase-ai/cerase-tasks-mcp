@@ -8,7 +8,7 @@ endpoints, which own the durable board state. The gateway injects the
 calling Agent's `agent_id` into every call (un-spoofable), so the agent
 can only ever touch its own board.
 
-Tools (9):
+Tools (10):
   - create_task(agent_id, title, project?, phase?, description?) → the new task
   - set_status(agent_id, task_id, status)          → updated task
   - list_tasks(agent_id, project?)                 → compact open list
@@ -17,6 +17,7 @@ Tools (9):
   - rename_project(agent_id, project, name)        → renamed project
   - merge_projects(agent_id, source, into)         → target + tasks moved
   - delete_project(agent_id, project)              → only when it holds none
+  - delete_task(agent_id, task_id)                 → one task, after approval
   - project_folder(agent_id, project)              → workspace folder path
 
 Boundaries the agent must respect (enforced in AGENTS.md, not here):
@@ -173,6 +174,14 @@ def _delete_project(agent_id: str, project: str) -> dict[str, Any]:
     )
 
 
+def _delete_task(agent_id: str, task_id: str) -> dict[str, Any]:
+    _require_agent(agent_id)
+    return _delete(
+        f"/api/internal/task-board/tasks/{task_id}",
+        {"agent_id": agent_id},
+    )
+
+
 def _project_folder(agent_id: str, project: str) -> dict[str, Any]:
     _require_agent(agent_id)
     return _post(
@@ -243,6 +252,13 @@ def delete_project(agent_id: str, project: str) -> dict[str, Any]:
     """Delete an EMPTY project — pass its NAME or id. A project that still holds tasks is refused, because deleting it would take that work's history with it: merge it into another project instead. "General" cannot be deleted. `agent_id` is gateway-bound.
     """
     return _delete_project(agent_id, project)
+
+
+@mcp.tool()
+def delete_task(agent_id: str, task_id: str) -> dict[str, Any]:
+    """Delete one of your tasks — pass its id from list_tasks. A deleted task cannot be brought back, so the person approves the deletion first. `agent_id` is gateway-bound.
+    """
+    return _delete_task(agent_id, task_id)
 
 
 @mcp.tool()
