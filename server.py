@@ -249,7 +249,7 @@ def merge_projects(agent_id: str, source: str, into: str) -> dict[str, Any]:
 
 @mcp.tool()
 def delete_project(agent_id: str, project: str) -> dict[str, Any]:
-    """Delete an EMPTY project — pass its NAME or id. A project that still holds tasks is refused, because deleting it would take that work's history with it: merge it into another project instead. "General" cannot be deleted. `agent_id` is gateway-bound.
+    """Delete an EMPTY project — pass its NAME or id. Its workspace folder and the files in it are deleted with it. A project that still holds tasks is refused, because deleting it would take that work's history with it: merge it into another project instead. "General" cannot be deleted. `agent_id` is gateway-bound.
     """
     return _delete_project(agent_id, project)
 
